@@ -1,0 +1,150 @@
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.navbar {
+    background-color: #4267b2;
+    color: white;
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+.nav-links {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.nav-links a:hover {
+    background-color: #365899;
+}
+
+.nav-links a i {
+    font-size: 16px;
+}
+
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 20px auto;
+    gap: 20px;
+}
+
+.profile-sidebar {
+    flex: 1;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.profile-sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.profile-avatar {
+    width: 100%;
+    max-width: 150px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.profile-sidebar h3 {
+    font-size: 22px;
+    color: #333;
+}
+
+.profile-sidebar p {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.edit-profile-btn {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #4267b2;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.edit-profile-btn i {
+    margin-right: 8px;
+}
+
+.edit-profile-btn:hover {
+    background-color: #365899;
+}
+
+.posts-section {
+    flex: 2;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.posts-section h1 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.posts-section article {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.posts-section article h3 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.posts-section article p {
+    font-size: 14px;
+    color: #555;
+}
+
+.posts-section article small {
+    font-size: 12px;
+    color: #888;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .profile-sidebar,
+    .posts-section {
+        width: 100%;
+    }
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/static/profile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <span class="logo" >FORUM</span>
+        <div class="nav-links">
+            <a href="/add-post"><i class="fas fa-plus-circle"></i> Add Post</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Profile Layout -->
+    <div class="container">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+            <h2>Profile</h2>
+            <img src="https://www.flaticon.com/fr/icone-gratuite/avatar_6858504" alt="User Avatar" class="profile-avatar">
+            <h3>{{ .Username }}</h3>
+            <p>Email: {{ .Email }}</p>
+            <p>Joined on: {{ .CreatedAt }}</p>
+            <a href="/edit-profile" class="edit-profile-btn"><i class="fas fa-edit"></i> Edit Profile</a>
+        </div>
+
+        <!-- Profile Posts Section -->
+        <div class="posts-section">
+            <h1>Your Posts</h1>
+            {{ if .Posts }}
+                {{ range .Posts }}
+                    <article>
+                        <h3>{{ .Title }}</h3>
+                        <p>{{ .Content }}</p>
+                        <p><small>Posted on {{ .CreatedAt }}</small></p>
+                    </article>
+                    <hr>
+                {{ end }}
+            {{ else }}
+                <p>You have no posts yet.</p>
+            {{ end }}
+        </div>
+    </div>
+</body>
+</html>

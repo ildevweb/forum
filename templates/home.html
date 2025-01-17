@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Forum Home</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <span class="logo">FORUM</span>
+        <div class="nav-links">
+            {{ if .LoggedIn }}
+                <a href="/profile"><i class="fas fa-user-circle"></i> Profile</a>
+                <a href="/add-post"><i class="fas fa-plus-circle"></i> Add Post</a>
+                <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {{ else }}
+                <a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="/register"><i class="fas fa-user-plus"></i> Register</a>
+            {{ end }}
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="posts-section">
+            <h1>Posts</h1>
+            {{ if .Posts }}
+                {{ range .Posts }}
+                    <article>
+                        <h3>{{ .Title }}</h3>
+                        <p>{{ .Content }}</p>
+                        <p><small>Posted by <strong>{{ .Username }}</strong> on {{ .CreatedAt }}</small></p>
+                        <div class="reaction-icons">
+                            <i class="fas fa-thumbs-up like-icon" onclick="handleLike(`{{.ID}}`)"></i> <span id="like-count-{{.ID}}">{{.Likes}}</span>
+                            <i class="fas fa-thumbs-down deslike-icon" onclick="handleDeslike(`{{.ID}}`)"></i> <span id="deslike-count-{{.ID}}">{{.Deslikes}}</span>
+                        </div>
+                    </article>
+                    <hr>
+                {{ end }}
+            {{ else }}
+                <p>No posts to display. Be the first to <a href="/make-post">add a post</a>!</p>
+            {{ end }}
+        </div>
+        {{ if .LoggedIn }}
+            <div class="create-post-section">
+                <h2>Create a New Post</h2>
+                <form method="POST" action="/make-post">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" ><br><br>
+                    <label for="content">Content:</label><br>
+                    <textarea id="content" name="content" rows="4" cols="40" ></textarea><br><br>
+                    <p id = "error"></p>
+                    <button id="create-post" type="submit">Create Post</button>
+                </form>
+            </div>
+        {{ end }}
+    </div>
+
+    <script src="/scripts/Home.js"></script>
+    <script src="/scripts/like_deslike.js"></script>
+</body>
+</html>
