@@ -10,13 +10,16 @@ import (
 )
 
 var (
-	emailRegex    = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`) 
-	usernameRegex = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]{7,29}$`)     
+	emailRegex    = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	usernameRegex = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]{7,29}$`)
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	Session := Checksession(w, r)
-	if Session {
+	Session  ,  code:= Checksession(w, r)
+	if code == http.StatusInternalServerError{ 
+		Eroors(w, r, code)
+		return 
+	}else if Session {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
@@ -58,17 +61,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid username format. Must start with a letter and be 8-30 characters long.", http.StatusBadRequest)
 		return
 	}
-	
+
 	if !isValidPassword(password) {
 		http.Error(w, "Password must be at least 8 characters long, with at least 1 letter and 1 number.", http.StatusBadRequest)
 		return
 	}
 
-	hashedPassword := password 
+	hashedPassword := password
 
 	_, err := database.DB.Exec("INSERT INTO users (email, username, password) VALUES (?, ?, ?)", email, username, hashedPassword)
 	if err != nil {
-		http.Error(w, "Failed to register user: Email already exists "  , http.StatusInternalServerError)
+		http.Error(w, "Failed to register user: Email already exists ", http.StatusInternalServerError)
 		return
 	}
 
@@ -80,7 +83,7 @@ func isValidEmail(email string) bool {
 		return false
 	}
 	localPart, domainPart := splitEmail(email)
-	return len(email) <= 320 && len(localPart) <= 64 && len(domainPart) <= 255  
+	return len(email) <= 320 && len(localPart) <= 64 && len(domainPart) <= 255
 }
 
 func splitEmail(email string) (string, string) {
@@ -91,6 +94,7 @@ func splitEmail(email string) (string, string) {
 	return parts[0], parts[1]
 }
 
+// elach hadii adrarii, password khaso ykon hashedPassword
 func isValidPassword(password string) bool {
 	if len(password) < 8 {
 		return false

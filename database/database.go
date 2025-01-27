@@ -33,6 +33,7 @@ func InitDB() {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
+	category TEXT NOT NULL,
     user_id INTEGER NOT NULL,
 	Likes INTEGER DEFAULT 0,
 	Deslikes INTEGER DEFAULT 0,
@@ -49,16 +50,39 @@ func InitDB() {
     user_agent TEXT
 );`
 
-
 	createCommentsTable := `
 	CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
+	Likes INTEGER DEFAULT 0,
+	Deslikes INTEGER DEFAULT 0,
     user_id INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+	);`
+
+	createCommentLikesTable := `
+	CREATE TABLE IF NOT EXISTS comment_likes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    comment_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    UNIQUE (user_id, comment_id)
+	);`
+
+	createCommentDeslikesTable := `
+	CREATE TABLE IF NOT EXISTS comment_deslikes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    comment_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    UNIQUE (user_id, comment_id)
 	);`
 
 	createLikesTable := `
@@ -71,7 +95,6 @@ func InitDB() {
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
     UNIQUE (user_id, post_id)
 	);`
-
 
 	createDeslikesTable := `
 	CREATE TABLE IF NOT EXISTS deslikes (
@@ -98,6 +121,14 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_, err = DB.Exec(createCommentLikesTable)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = DB.Exec(createCommentDeslikesTable)
+	if err != nil {
+		log.Fatal(err)
+	}
 	_, err = DB.Exec(createLikesTable)
 	if err != nil {
 		log.Fatal(err)
@@ -106,7 +137,7 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_,err =  DB.Exec(Sessions)
+	_, err = DB.Exec(Sessions)
 	if err != nil {
 		log.Fatal(err)
 	}

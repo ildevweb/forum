@@ -28,7 +28,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) []Post {
 	return posts
 }
 
-func get_user_id(w http.ResponseWriter, r *http.Request) int {
+func get_user_id(r *http.Request) int {
 	session, err := r.Cookie("session_id")
 	if err != nil {
 		return 0
@@ -51,11 +51,6 @@ func Check(user_id int, post_id int) bool {
 	return rows.Next()
 }
 
-var (
-	colored_like    = false
-	colored_deslike = false
-)
-
 
 func Like_handle(w http.ResponseWriter, r *http.Request) {
 	posts := GetPosts(w, r)
@@ -66,7 +61,7 @@ func Like_handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := get_user_id(w, r)
+	userID := get_user_id(r)
 	if userID <= 0 {
 		fmt.Println("can't like")
 		return
@@ -80,7 +75,6 @@ func Like_handle(w http.ResponseWriter, r *http.Request) {
 			Eroors(w, r, 500)
 			return
 		}
-		colored_like = false
 		postLikes.Likes--
 		posts[postID-1].Likes = postLikes.Likes
 	} else {
@@ -88,15 +82,12 @@ func Like_handle(w http.ResponseWriter, r *http.Request) {
 			postLikes.Deslikes--
 			posts[postID-1].Deslikes = postLikes.Deslikes
 
-			colored_deslike = false
-
 			_, err := database.DB.Exec(`DELETE FROM deslikes WHERE user_id = ? AND post_id = ?`, userID, postID)
 			if err != nil {
 				Eroors(w, r, 500)
 				return
 			}
 		}
-		colored_like = true
 		postLikes.Likes++
 		posts[postID-1].Likes = postLikes.Likes
 
@@ -113,8 +104,6 @@ func Like_handle(w http.ResponseWriter, r *http.Request) {
 		"status":          "success",
 		"newLikeCount":    postLikes.Likes,
 		"newDeslikeCount": postLikes.Deslikes,
-		"colored_like":    colored_like,
-		"colored_deslike": colored_deslike,
 	}
 	json.NewEncoder(w).Encode(response)
 
@@ -131,11 +120,7 @@ func Check_deslike(user_id int, post_id int) bool {
 		return false
 	}
 	defer rows.Close()
-	if rows.Next() {
-		return true
-	}
-
-	return false
+	return rows.Next() 
 }
 
 func Deslike_handle(w http.ResponseWriter, r *http.Request) {
@@ -148,7 +133,7 @@ func Deslike_handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
-	userID := get_user_id(w, r)
+	userID := get_user_id(r)
 	if userID <= 0 {
 		fmt.Println("can't like")
 		return
@@ -161,12 +146,10 @@ func Deslike_handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		colored_deslike = false
 		post.Deslikes--
 		posts[postID-1].Deslikes = post.Deslikes
 	} else {
 		if Check(userID, postID) {
-			colored_deslike = false
 			post.Likes--
 			posts[postID-1].Likes = post.Likes
 
@@ -176,7 +159,6 @@ func Deslike_handle(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		colored_deslike = true
 		post.Deslikes++
 		posts[postID-1].Deslikes = post.Deslikes
 
@@ -193,8 +175,6 @@ func Deslike_handle(w http.ResponseWriter, r *http.Request) {
 		"status":          "success",
 		"newLikeCount":    post.Likes,
 		"newDeslikeCount": post.Deslikes,
-		"colored_like":    colored_like,
-		"colored_deslike": colored_deslike,
 	}
 	json.NewEncoder(w).Encode(response)
 

@@ -10,13 +10,15 @@ import (
 )
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method != http.MethodPost {
 		Eroors(w, r, http.StatusMethodNotAllowed)
 		return
 	}
-	sesionid :=  Checksession(w, r)	
-	if !sesionid {
+	sesionid ,  code:=  Checksession(w, r)
+	if code != http.StatusOK {
+		Eroors(w, r, code)
+		return
+	}else  if !sesionid {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -33,12 +35,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	//  parse  json data 
-	var postContent  struct { 
+	//  parse  json data
+	var postContent  struct {
 		Title string `json:"title"`
 		Content  string `json:"content"`
+		Category string `json:"category"`
 	}
-	
 	err = json.NewDecoder(r.Body).Decode(&postContent)
 	if err != nil {
 		Eroors(w, r, http.StatusBadRequest)
@@ -54,13 +56,20 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Insert the post into the database
 	_, err = database.DB.Exec(`
-        INSERT INTO posts (title, content, user_id) 
-        VALUES (?, ?, ?)`, postContent.Title, postContent.Content, userID)
+        INSERT INTO posts (title, content, category, user_id) 
+        VALUES (?, ?, ?, ?)`, postContent.Title, postContent.Content, postContent.Category, userID)
 	if err != nil {
 		Eroors(w, r, http.StatusInternalServerError)
 		return
 	}
 
 	// Redirect back to the home page
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	post  , _ :=  GetPostsByUser(w , r )
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]interface{}{
+		"status" : "success",
+		"post" : post[len(post)-1] ,
+	}
+	json.NewEncoder(w).Encode(response)
 }

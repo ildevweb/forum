@@ -26,7 +26,9 @@ submit.addEventListener("click", async  function(e) {
                 error.style.display = "block";
             }
         }catch(Eroor){
-            console.log(Eroor)
+            let  error  = document.querySelector("#errorMessage");
+                error.innerHTML =  Eroor;
+                error.style.display = "block";
         }
     }
    

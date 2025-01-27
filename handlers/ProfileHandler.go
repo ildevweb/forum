@@ -7,10 +7,13 @@ import (
 )
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	Sesion := Checksession(w, r)
+	Sesion ,  code  := Checksession(w, r)
 	if !Sesion {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
+	}else  if code != http.StatusOK {
+		Eroors(w , r , code )
+		return 
 	}
 
 	Sesionid, _ := r.Cookie("session_id")
@@ -43,24 +46,71 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	// http.ServeFile(w, r, "templates/profile.html")
 }
 
+
+
 func GetPostsByUser(w http.ResponseWriter, r *http.Request) ([]Post, bool) {
 	var posts []Post
 	Sesionid, _ := r.Cookie("session_id")
 	var UserID int
 	database.DB.QueryRow("SELECT user_id FROM sessions WHERE session_id = ?", Sesionid.Value).Scan(&UserID)
-	row, er := database.DB.Query("SELECT id, title, content, created_at FROM posts WHERE user_id = ?", UserID)
+	row, er := database.DB.Query(`SELECT posts.id, posts.title, posts.content, posts.category, posts.Likes, posts.Deslikes, users.username, posts.created_at
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+		WHERE posts.user_id=?`, UserID)
 	if er != nil {
 		Eroors(w, r, http.StatusInternalServerError)
 		return nil, true
 	}
 	for row.Next() {
 		var post Post
-		err := row.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt)
+		err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.Likes, &post.Deslikes, &post.Username, &post.CreatedAt)
 		if err != nil {
 			Eroors(w, r, http.StatusInternalServerError)
 			return nil, true
 		}
 		posts = append(posts, post)
+	}
+	return posts, false
+}
+
+func GetPostsByUserLike(w http.ResponseWriter, r *http.Request) ([]Post, bool) {
+	var posts []Post
+	Sesionid, _ := r.Cookie("session_id")
+	var UserID int
+	database.DB.QueryRow("SELECT user_id FROM sessions WHERE session_id = ?", Sesionid.Value).Scan(&UserID)
+
+	rows, err := database.DB.Query("SELECT post_id FROM likes WHERE user_id = ?", UserID)
+	if err != nil {
+		Eroors(w, r, http.StatusInternalServerError)
+		return nil, true
+	}
+	var postIds []int
+	for rows.Next() {
+		var postId int
+		if err := rows.Scan(&postId); err != nil {
+			Eroors(w, r, http.StatusInternalServerError)
+			return nil, true
+		}
+		postIds = append(postIds, postId)
+	}
+	for _, id := range postIds {
+		row, er := database.DB.Query(`SELECT posts.id, posts.title, posts.content, posts.category, posts.Likes, posts.Deslikes, users.username, posts.created_at
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+		WHERE posts.id = ?`, id)
+		if er != nil {
+			Eroors(w, r, http.StatusInternalServerError)
+			return nil, true
+		}
+		for row.Next() {
+			var post Post
+			err := row.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.Likes, &post.Deslikes, &post.Username, &post.CreatedAt)
+			if err != nil {
+				Eroors(w, r, http.StatusInternalServerError)
+				return nil, true
+			}
+			posts = append(posts, post)
+		}
 	}
 	return posts, false
 }

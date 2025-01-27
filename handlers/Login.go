@@ -11,17 +11,20 @@ import (
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	Sesion := Checksession(w, r)
-	if Sesion {
+	Sesion  , code := Checksession(w, r)
+	if code == http.StatusInternalServerError{ 
+		Eroors(w, r, code)
+		return 
+	}
+	if  Sesion {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 
 	if r.Method == http.MethodGet {
-		http.ServeFile(w, r, "templates/login.html") 
+		http.ServeFile(w, r, "templates/login.html")
 		return
 	}
-
 	var data struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -51,7 +54,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-if password != storedPassword {
+	if password != storedPassword {
 		http.Error(w, "Invalid  password", http.StatusUnauthorized)
 		return
 	}
@@ -61,7 +64,7 @@ if password != storedPassword {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
 		return
 	}
-		_, err = database.DB.Exec(`
+	_, err = database.DB.Exec(`
     INSERT INTO sessions (session_id, user_id, expires_at, ip_address, user_agent)
     VALUES (?, ?, ?, ?, ?)`, sessionID, userID, time.Now().Add(24*time.Hour), r.RemoteAddr, r.UserAgent())
 	if err != nil {
@@ -72,7 +75,7 @@ if password != storedPassword {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_id",
 		Value:   sessionID.String(),
-		Expires: time.Now().Add(24 * time.Hour), 
+		Expires: time.Now().Add(24 * time.Hour),
 	})
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)

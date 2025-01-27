@@ -54,7 +54,13 @@ body {
     margin: 20px auto;
     gap: 20px;
 }
-
+.left-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
 .posts-section {
     flex: 3;
     background-color: white;
@@ -142,6 +148,7 @@ body {
     background-color: #365899;
 }
 
+
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
@@ -190,4 +197,78 @@ article p {
 
 .desactive {
     color:red;
+}
+
+
+.filter-section {
+    width: 100%;
+    background-color: #f5f5f5;
+    padding: 10px; 
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-section input {
+    width: 95%; 
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+
+.filter-section select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+}
+.comments-section{
+    margin-top: 20px;
+    display: flex ;
+    flex-direction: column;
+    gap: 10px;
+
+}
+.comment-form {
+    display:grid;
+    gap: 10px;
+    margin-top: 20px;
+}
+.comment-form textarea {
+    font-size: 14px;
+    border-radius: 5px;
+    padding: 10px;
+    flex: 1;
+    border: 1px solid #ccc;
+    resize: none;
+
+}
+.coomment-field {
+    flex: 1;
+    resize: none;
+    border: none;
+    font-size: 14px;
+    outline: none;
+}
+.comment-form button {
+    background-color: #4267b2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.comment-form button:hover {
+    background-color: #365899;
+}
+#CommentError{
+    color: red;
+    margin-top: 10px;
+    display: none;
 }
