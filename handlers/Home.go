@@ -33,22 +33,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Eroors(w, r, code)
 		return
 	}
-	if !Sesion {
-		fmt.Fprintf(w, `
-			<!DOCTYPE html>
-			<html>
-			<head>
-				<title>Clear LocalStorage</title>
-			</head>
-			<body>
-				<script>
-					// Clear localStorage
-					localStorage.clear();
-				</script>
-			</body>
-			</html>
-		`)
-	}
 
 	if r.URL.Path != "/" && r.URL.Path != "/home" {
 		Eroors(w, r, http.StatusNotFound)
@@ -108,10 +92,14 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Println(post.Type)
 	// }
 	// Render the home page template with posts
-	Interface.ExecuteTemplate(w, "home.html", map[string]interface{}{
+	Eroor := Interface.ExecuteTemplate(w, "home.html", map[string]interface{}{
 		"Posts":    posts,
 		"LoggedIn": Sesion,
 	})
+	if Eroor != nil {
+		Eroors(w, r, http.StatusInternalServerError)
+		return
+	}
 }
 
 func Checksession(w http.ResponseWriter, r *http.Request) (bool, int) {
@@ -129,10 +117,13 @@ func Checksession(w http.ResponseWriter, r *http.Request) (bool, int) {
 	return username != "", http.StatusOK
 }
 
-
 func Eroors(w http.ResponseWriter, r *http.Request, code int) {
-	Interface.ExecuteTemplate(w, "Error.html", map[string]interface{}{
+	Eror := Interface.ExecuteTemplate(w, "Error.html", map[string]interface{}{
 		"Code":    code,
 		"Message": http.StatusText(code),
 	})
+	if Eror != nil {
+		http.Error(w, http.StatusText(code), code)
+		return
+	}
 }

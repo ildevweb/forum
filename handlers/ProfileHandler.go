@@ -37,12 +37,16 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if Eroor {
 		return
 	}
-	Interface.ExecuteTemplate(w, "profile.html", map[string]interface{}{
+	ERR := Interface.ExecuteTemplate(w, "profile.html", map[string]interface{}{
 		"Username":  userinfo.Username,
 		"Email":     userinfo.Email,
 		"CreatedAt": userinfo.CreatedAt,
 		"Posts":     posts,
 	})
+	if  ERR != nil {
+		Eroors(w, r, http.StatusInternalServerError)
+		return 
+	}
 	// http.ServeFile(w, r, "templates/profile.html")
 }
 

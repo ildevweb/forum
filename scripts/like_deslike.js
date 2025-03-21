@@ -14,6 +14,9 @@ function handleLike(postId) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
+            const article = document.getElementById(`article_post_${postId}`);
+            article.classList.toggle("liked");
+
             const likeCountElement = document.getElementById(`like-count-${postId}`);
             const deslikeCountElement = document.getElementById(`deslike-count-${postId}`);
             deslikeCountElement.innerText = data.newDeslikeCount;
@@ -39,6 +42,9 @@ function handleDeslike(postId) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
+            const article = document.getElementById(`article_post_${postId}`);
+            article.classList.remove("liked");
+
             const likeCountElement = document.getElementById(`like-count-${postId}`);
             const deslikeCountElement = document.getElementById(`deslike-count-${postId}`);
             deslikeCountElement.innerText = data.newDeslikeCount;

@@ -1,9 +1,70 @@
+
+function loginClicked() {
+    const loginWrapper = document.getElementById("login-wrapper");
+    const modalOverlay = document.getElementById("login-modal-overlay");
+
+    loginWrapper.classList.toggle("display_none");
+
+    const registerWrapper = document.getElementById("register-wrapper");
+    const registermodalOverlay = document.getElementById("register-modal-overlay");
+    registerWrapper.classList.add("display_none");
+    registermodalOverlay.style.display = 'none';
+
+    if (loginWrapper.classList.contains("display_none")) {
+        modalOverlay.style.display = 'none';
+    } else {
+        modalOverlay.style.display = 'flex';
+        loginWrapper.classList.add("show");
+    }
+}
+
+function registerClicked() {
+    const registerWrapper = document.getElementById("register-wrapper");
+    const modalOverlay = document.getElementById("register-modal-overlay");
+
+    registerWrapper.classList.toggle("display_none");
+
+    const loginWrapper = document.getElementById("login-wrapper");
+    const loginmodalOverlay = document.getElementById("login-modal-overlay");
+    loginWrapper.classList.add("display_none");
+    loginmodalOverlay.style.display = 'none';
+
+    if (registerWrapper.classList.contains("display_none")) {
+        modalOverlay.style.display = 'none';
+    } else {
+        modalOverlay.style.display = 'flex';
+        registerWrapper.classList.add("show");
+    }
+}
+
+document.getElementById("login-modal-overlay").addEventListener("click", function(event) {
+    if (event.target === this) {
+        const loginWrapper = document.getElementById("login-wrapper");
+        const modalOverlay = document.getElementById("login-modal-overlay");
+
+        loginWrapper.classList.add("display_none");
+        modalOverlay.style.display = 'none';
+    }
+});
+
+document.getElementById("register-modal-overlay").addEventListener("click", function(event) {
+    if (event.target === this) {
+        const registerWrapper = document.getElementById("register-wrapper");
+        const modalOverlay = document.getElementById("register-modal-overlay");
+
+        registerWrapper.classList.add("display_none");
+        modalOverlay.style.display = 'none';
+    }
+});
+
+
 let creatpostbtn =  document.getElementById("create-post");
  creatpostbtn.addEventListener("click", async  function(e) {
     e.preventDefault()
     let  Title  = document.getElementById("title").value;
     let Content = document.getElementById("content").value;
-    let Category = document.getElementById("category").value;
+    let Category = getSelectedCategories()
+    
     
     fetch(`/make-post`, {
         method: 'POST',
@@ -19,11 +80,21 @@ let creatpostbtn =  document.getElementById("create-post");
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
+            error.innerHTML = "Post  Has  Created Sucessfuly !"
+            error.style.color =  "green"
+            error.style.display = "block";
+            
             let posts_section = document.querySelector(".posts-section");
-            posts_section.appendChild(createPost(data.post));
+            let firstElement = posts_section.firstChild ;
+            let article = createPost(data.post);
+            posts_section.insertBefore(article, firstElement);
+            //posts_section.appendChild(article);
 
-
-
+            let no_posts = document.getElementById(`no-posts`);
+            if (no_posts != null) {
+                no_posts.style.display = "none";
+            }
+            //handle adding comments for the added posts without reloading page
             let buttons = document.querySelectorAll("#comment-button-created");
             buttons.forEach((button) => {
                 button.addEventListener("click", (e) => {
@@ -31,16 +102,29 @@ let creatpostbtn =  document.getElementById("create-post");
                     addComment(e)
                 })
             })
+
+
+            //handle filter if adding posts without reloading the page
+            const posts = document.querySelectorAll('article[id^="article_post_"]');
+            let  radiosbtn  =  document.querySelectorAll("input[name='filter']");
+            radiosbtn.forEach(radio => {
+                radio.addEventListener("change", () => {
+                    let  filter  =  radio.value;
+                    filterPosts(filter, posts);
+                })
+            })
             
+            search_field(posts);
         } else {
             alert('Error');
         }
     })
     .catch(err => {
         let  error  = document.querySelector("#error");
-        error.innerHTML =  err;
+        error.innerHTML =  "Cannot create post ! (Field is empty Or something went wrong)";
+        error.style.color =  "red"
         error.style.display = "block";
-        console.log(err)
+        //console.log(err)
     });
  })
 
@@ -54,7 +138,7 @@ let creatpostbtn =  document.getElementById("create-post");
     // Create the article element
     const article = document.createElement('article');
     article.id = `article_post_${post.ID}`;
-    //article.classList.add(post.Type);
+    article.classList.add("created");
 
     // Create the category section
     const categorySection = document.createElement('h4');
@@ -67,6 +151,7 @@ let creatpostbtn =  document.getElementById("create-post");
     // Create the content paragraph
     const content = document.createElement('p');
     content.textContent = post.Content;
+    content.id = "content-post";
 
     // Create the posted info
     const postedInfo = document.createElement('p');
@@ -115,10 +200,6 @@ let creatpostbtn =  document.getElementById("create-post");
     commentsContainer.classList.add('comments-container-created');
     commentsContainer.setAttribute("id", `comment-container-${post.ID}`)
     if (post.Comments && post.Comments.length > 0) {
-        const commentsHeader = document.createElement('h2');
-        commentsHeader.textContent = 'Comments';
-        commentsContainer.appendChild(commentsHeader);
-
         post.Comments.forEach(comment => {
             const commentDiv = document.createElement('div');
             commentDiv.classList.add('comment');
@@ -196,7 +277,7 @@ let creatpostbtn =  document.getElementById("create-post");
     hiddenInput.value = post.ID;
 
     const commentField = document.createElement('textarea');
-    commentField.classList.add('comment-field');
+    commentField.classList.add('coomment-field');
     commentField.name = 'comment';
     commentField.placeholder = 'Write a comment...';
     commentField.required = true;

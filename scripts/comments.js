@@ -28,13 +28,17 @@ async function  addComment(e) {
         if (data.status === 'success') {
             let comments_container = document.getElementById(`comment-container-${data.comment.PostID}`);
             comments_container.appendChild(createCommentsSection(data.comment));
+            let none_comment = document.getElementById(`none-comment-${data.comment.PostID}`);
+            if (none_comment != null) {
+                none_comment.style.display = "none";
+            }
         } else {
             alert('Error');
         }
     })
     .catch(err => {
         console.log(err)
-        error.innerHTML = "Something went wrong ! " + err;
+        error.innerHTML = "Cannot Add Comment ! (Field is empty Or something went wrong or  Length  is Too long)";
         error.style.display = "block";
     });
 }
@@ -47,6 +51,7 @@ function createCommentsSection(comment) {
 
             const commentContent = document.createElement('div');
             commentContent.classList.add('comment-content');
+            commentContent.id = "comments-content";
 
             // Create comment text
             const commentText = document.createElement('p');

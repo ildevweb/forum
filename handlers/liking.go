@@ -53,6 +53,10 @@ func Check(user_id int, post_id int) bool {
 
 
 func Like_handle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		Eroors(w, r, http.StatusMethodNotAllowed)
+		return
+	}
 	posts := GetPosts(w, r)
 	postIDStr := r.URL.Path[len("/like-post/"):]
 	postID, err := strconv.Atoi(postIDStr)

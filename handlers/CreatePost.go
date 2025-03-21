@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"forum/database"
 )
@@ -46,15 +47,22 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		Eroors(w, r, http.StatusBadRequest)
 		return
 	}
+	title :=  strings.TrimSpace(postContent.Title) ; Content :=  strings.TrimSpace(postContent.Content)
+
 	switch {
-	case postContent.Title == "":
+	case title== "":
 		http.Error(w, "Title is required", http.StatusBadRequest)
 		return
-	case postContent.Content == "":
+	case Content == "":
 		http.Error(w, "Content is required", http.StatusBadRequest)
 		return
 	}
-	// Insert the post into the database
+	// ---- Check  Lenght  of  The Content 
+	if  len(postContent.Title) >  50  ||  len(postContent.Content) >  300{
+		http.Error(w ,  "Something  Whas  Wrong !" ,  http.StatusBadRequest)
+		return 
+	}
+	// ---- Insert the post into the database
 	_, err = database.DB.Exec(`
         INSERT INTO posts (title, content, category, user_id) 
         VALUES (?, ?, ?, ?)`, postContent.Title, postContent.Content, postContent.Category, userID)

@@ -18,7 +18,6 @@ func check_comment_like(user_id int, comment_id int) bool {
 	return rows.Next()
 }
 
-
 func check_comment_deslike(user_id int, comment_id int) bool {
 	rows, err := database.DB.Query(`SELECT 1 FROM comment_deslikes WHERE user_id = ? AND comment_id = ?`, user_id, comment_id)
 	if err != nil {
@@ -28,9 +27,11 @@ func check_comment_deslike(user_id int, comment_id int) bool {
 	return rows.Next()
 }
 
-
-
 func Like_comment_handle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		Eroors(w, r, http.StatusMethodNotAllowed)
+		return
+	}
 	commentIDStr := r.URL.Path[len("/like-comment/"):]
 	commentID, err := strconv.Atoi(commentIDStr)
 	if err != nil || commentID < 0 {
@@ -54,7 +55,6 @@ func Like_comment_handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 
 	if check_comment_like(userID, commentID) {
 		_, err := database.DB.Exec(`DELETE FROM comment_likes WHERE user_id = ? AND comment_id = ?`, userID, commentID)
@@ -81,7 +81,6 @@ func Like_comment_handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	response := map[string]interface{}{
@@ -99,8 +98,6 @@ func Like_comment_handle(w http.ResponseWriter, r *http.Request) {
 }
 
 
-
-
 func Deslike_comment_handle(w http.ResponseWriter, r *http.Request) {
 	commentIDStr := r.URL.Path[len("/deslike-comment/"):]
 	commentID, err := strconv.Atoi(commentIDStr)
@@ -115,7 +112,6 @@ func Deslike_comment_handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	var likes int
 	var deslikes int
 	rows, _ := database.DB.Query(`SELECT Likes, Deslikes FROM comments WHERE id=?`, commentID)
@@ -127,7 +123,6 @@ func Deslike_comment_handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 
 	if check_comment_deslike(userID, commentID) {
 		_, err := database.DB.Exec(`DELETE FROM comment_deslikes WHERE user_id = ? AND comment_id = ?`, userID, commentID)
@@ -155,7 +150,6 @@ func Deslike_comment_handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

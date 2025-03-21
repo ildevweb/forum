@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"forum/database"
-	"forum/handlers"
 	"log"
 	"net/http"
+
+	"forum/database"
+	"forum/handlers"
 )
 
 func main() {
@@ -24,9 +25,8 @@ func main() {
 	http.HandleFunc("/deslike-comment/", handlers.Deslike_comment_handle)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	fmt.Println("server starting at: http://localhost:8080/")
-	err := http.ListenAndServe(":8080", nil)
-
+	fmt.Println("server starting at: http://localhost:8001/")
+	err := http.ListenAndServe(":8001", nil)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}

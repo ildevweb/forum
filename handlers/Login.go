@@ -11,18 +11,23 @@ import (
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	Sesion  , code := Checksession(w, r)
-	if code == http.StatusInternalServerError{ 
+	Sesion, code := Checksession(w, r)
+
+	if code == http.StatusInternalServerError {
 		Eroors(w, r, code)
-		return 
+		return
 	}
-	if  Sesion {
+
+	if Sesion {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 
 	if r.Method == http.MethodGet {
-		http.ServeFile(w, r, "templates/login.html")
+		eroor := Interface.ExecuteTemplate(w, "login.html", nil)
+		if eroor != nil {
+			Eroors(w, r, http.StatusInternalServerError)
+		}
 		return
 	}
 	var data struct {
@@ -58,10 +63,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid  password", http.StatusUnauthorized)
 		return
 	}
-
 	sessionID, err := uuid.NewV4()
 	if err != nil {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
+		return
+	}
+	//  Delet older  Session  Saved
+	_, er2 := database.DB.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
+	if er2 != nil {
+		Eroors(w, r, 500)
 		return
 	}
 	_, err = database.DB.Exec(`

@@ -26,6 +26,10 @@ type Comments struct {
 }
 
 func SaveComments(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		Eroors(w, r, http.StatusMethodNotAllowed)
+		return
+	}
 	sesion, _ := Checksession(w, r)
 	if !sesion {
 		http.Error(w, "<a href='/register'>Register</a> first Or Login <a href='/login'>Login</a>", http.StatusUnauthorized)
@@ -76,21 +80,19 @@ func SaveComments(w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	/*_, err2 := json.Marshal(comment)
-	if err2 != nil {
-		http.Error(w, "Error converting struct to JSON", http.StatusInternalServerError)
-		return
-	}*/
 
+if  len(comment.Comment) > 300  {
+	http.Error(w ,  "Lenght  is too long ! " ,http.StatusBadRequest )
+	return 
+}
 	
-	if comment.Comment == "" {
+	if cmt := strings.TrimSpace( comment.Comment) ; cmt == "" {
 		http.Error(w, "Comment is required", http.StatusBadRequest)
 		return
 	}
 
+
 	UserId := get_user_id(r)
-	// var postId string
-	// database.DB.QueryRow("SELECT id FROM posts WHERE content = ?", comment).Scan(&postId)
 
 	_, err = database.DB.Exec(
 		`INSERT INTO comments (Post_id, User_id, Content) VALUES (?, ?, ?)`,
@@ -102,7 +104,6 @@ func SaveComments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// http.Redirect(w, r, "/home", http.StatusSeeOther)
 	comments, _ := GetCommentsByUser(w, r)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

@@ -15,17 +15,20 @@ var (
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	Session  ,  code:= Checksession(w, r)
-	if code == http.StatusInternalServerError{ 
+	Session, code := Checksession(w, r)
+	if code == http.StatusInternalServerError {
 		Eroors(w, r, code)
-		return 
-	}else if Session {
+		return
+	} else if Session {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}
 
 	if r.Method == http.MethodGet {
-		http.ServeFile(w, r, "templates/register.html")
+		Eroor := Interface.ExecuteTemplate(w, "register.html", nil)
+		if Eroor != nil {
+			Eroors(w, r, http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -75,7 +78,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func isValidEmail(email string) bool {
